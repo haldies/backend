@@ -1,0 +1,10 @@
+uvicorn
+sqlalchemy
+psycopg2
+psycopg2-binary
+scipy
+deepface
+fastapi
+python-multipart
+python-dotenv
+

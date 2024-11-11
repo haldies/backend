@@ -1,0 +1,15 @@
+
+*.pyc                # File Python yang dikompilasi
+*.pyo                # File Python yang dikompilasi
+__pycache__/         # Folder yang berisi file-file pyc
+*.pyd                # File extension untuk Python dynamic modules
+*.so                 # File shared object
+*.egg-info/          # Folder metadata untuk packages yang diinstall via setuptools
+dist/                 # Folder distribusi
+build/                # Folder build
+.eggs/                # Folder temporary egg files
+
+
+
+venv/*
+.venv/*
