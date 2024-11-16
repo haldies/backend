@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, UploadFile, File
 from sqlalchemy.orm import Session
-from app.database.crud import create_user, get_users, update_user, create_attendance_record, get_attendance_records
+from app.service.user_service import crud_create_user, crud_get_users, crud_update_user
+from app.service.attendance_service import crud_create_attendance_record, crud_get_attendance_records
 
 from app.schemas import schemas
 import pickle
@@ -8,16 +9,11 @@ from uuid import UUID
 from datetime import datetime
 from app.utils.deepface_utils import save_face_data
 import os
+from app.database.connection import get_db
+
 
 
 app = FastAPI()
-
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.post("/api/face_embedding/")
@@ -48,7 +44,7 @@ async def create_face_embedding(
     }
     
     
-@app.post("api/verify_face/")
+@app.post("/api/verify_face/")
 
 async def verify_face(user_id: UUID, image: UploadFile = File(...)):
     filename = image.filename
@@ -77,29 +73,33 @@ async def verify_face(user_id: UUID, image: UploadFile = File(...)):
         "message": "Face verification successful"
     }
 
-@app.post("api/users/", response_model=schemas.User)
+@app.post("/api/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    return crud.create_user(db=db, name=user.name, email=user.email, role=user.role)
+    return crud_create_user(db=db, name=user.name, email=user.email, role=user.role)
 
 
-@app.get("api/users/", response_model=list[schemas.User])
+@app.get("/api/users/", response_model=list[schemas.User])
 def get_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return crud.get_users(db=db, skip=skip, limit=limit)
+    return crud_get_users(db=db, skip=skip, limit=limit)
 
 
-@app.put("api/users/{user_id}", response_model=schemas.User)
+
+@app.put("/api/users/{user_id}", response_model=schemas.User)
 def update_user(user_id: str, user: schemas.UserCreate, db: Session = Depends(get_db)):
-    return crud.update_user(db=db, user_id=user_id, name=user.name, email=user.email, role=user.role)
+    return crud_update_user(db=db, user_id=user_id, name=user.name, email=user.email, role=user.role)
 
 
 
-@app.post("api/attendance_records/", response_model=schemas.AttendanceRecord)
+@app.post("/api/attendance_records/", response_model=schemas.AttendanceRecord)
 def create_attendance_record(record: schemas.AttendanceRecordCreate, db: Session = Depends(get_db)):
-    return crud.create_attendance_record(db=db, user_id=record.user_id, session_id=record.session_id, status=record.status)
+    return crud_create_attendance_record(db=db, user_id=record.user_id, session_id=record.session_id, status=record.status)
 
 
-@app.get("api/attendance_records/", response_model=list[schemas.AttendanceRecord])
+@app.get("/api/attendance_records/", response_model=list[schemas.AttendanceRecord])
 def get_attendance_records(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return crud.get_attendance_records(db=db, skip=skip, limit=limit)
+    return crud_get_attendance_records(db=db, skip=skip, limit=limit)
 
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}

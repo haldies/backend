@@ -1,38 +1,16 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-import psycopg2
-from psycopg2 import OperationalError
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-def test_connection():
-    try:
-        connection = psycopg2.connect(
-            user="postgres",
-            password="postgres",
-            host="localhost",
-            port="5432",
-            database="absensi_db"
-        )
-        print("Koneksi berhasil!")
-        connection.close()
-    except OperationalError as e:
-        print(f"Error: {e}")
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/absensi_db"
 
-
-test_connection()
-
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-engine = create_engine("postgresql://postgres:postgres@localhost:5432/absensi_db")
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def create_tables():
+def get_db():
+    db = SessionLocal()
     try:
-        Base.metadata.create_all(bind=engine)
-        print("Tabel telah dibuat.")
-    except Exception as e:
-        print(f"Error creating tables: {e}")
-
-if __name__ == "__main__":
-    create_tables()
+        yield db
+    finally:
+        db.close()
